@@ -1,0 +1,10 @@
+
+__pycache__/
+
+first-test.ipynb
+
+*.html
+
+*.code-workspace
+
+*.png
