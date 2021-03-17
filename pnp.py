@@ -144,7 +144,7 @@ class LimitedGrowth(Model):
             'wolf': lambda population, constants: population['wolf'] * min(constants['max-wolf-growth'], (constants['rabbit-value'] * population['rabbit'] - constants['wolf-hunger']))
         }
 
-class LimitedFood(Model):
+class Grass(Model):
     
     def set_population(self):
         return {
