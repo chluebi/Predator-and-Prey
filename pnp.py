@@ -2,6 +2,16 @@ import pandas as pd
 import tqdm
 
 
+def prune(df, factor):
+    df = df.copy()
+
+    first = df.copy()[df['time'] == 0].iloc[0, 0]
+    second = df.copy()[df['time'] > 0].iloc[0, 0]
+    distance = first - second
+
+    df = df[(df['time']/distance) % factor == 0]
+    return df
+
 class Model:
 
     def __init__(self):
@@ -36,7 +46,7 @@ class Model:
 
         return population
 
-    def run_simulation(self, steps, step_size):
+    def run_simulation(self, steps, step_size, compression=1):
 
         population = self.population.copy()
         constants = self.constants.copy()
@@ -51,10 +61,11 @@ class Model:
 
         for step in tqdm.tqdm(range(1, steps+1)):
             population = self.next_step(population, constants, functions, step_size)
-            population_development.append({
-                'time': step*step_size,
-                'population': population.copy()
-            })
+            if step % compression == 0:
+                population_development.append({
+                    'time': step*step_size,
+                    'population': population.copy()
+                })
 
 
         single_population_development = {
