@@ -1,6 +1,6 @@
 import pandas as pd
 import tqdm
-
+import math
 
 def prune(df, factor):
     df = df.copy()
@@ -18,6 +18,7 @@ class Model:
         self.population = self.set_population()
         self.constants = self.set_constants()
         self.functions = self.set_functions()
+        self.discrete = self.set_discrete()
 
     def set_population(self):
         return {
@@ -31,6 +32,10 @@ class Model:
         return {
         }
 
+    def set_discrete(self):
+        return False
+
+
     def next_step(self, population, constants, functions, t):
         new_population = population.copy()
 
@@ -40,8 +45,11 @@ class Model:
         delta_population = {}
 
         for animal, number in population.items():
-            delta_population[animal] = new_population[animal] * t
-            population[animal] += delta_population[animal]
+            if self.discrete:
+                population[animal] = new_population[animal]
+            else:
+                delta_population[animal] = new_population[animal] * t
+                population[animal] += delta_population[animal]
             population[animal] = population[animal]
 
         return population
@@ -171,4 +179,31 @@ class Grass(Model):
             'wolf': lambda population, constants: population['wolf'] * (constants['rabbit-value'] * population['rabbit'] - constants['wolf-hunger'])
         }
 
-models = [SimpleModel, LimitedGrowth, Grass]
+
+class NicholsonBailey(Model):
+
+    def set_population(self):
+        return {
+        'rabbit': 1,
+        'wolf': 1
+        }
+
+    def set_constants(self):
+        return {
+            'rabbit-r': 1, # 1
+            'hunt': 1, #1
+            'rabbit-value': 1, #1
+            'wolf-hunger': 1 #1
+        }
+
+    def set_functions(self):
+        return {
+            'rabbit': lambda population, constants: constants['rabbit-r'] * population['rabbit'] * math.exp(- constants['hunt'] * population['wolf']),
+            'wolf': lambda population, constants: constants['rabbit-value'] * population['rabbit'] * (1 - math.exp(- constants['hunt'] * population['wolf']))
+        }
+
+    def set_discrete(self):
+        return True
+
+
+models = [SimpleModel, LimitedGrowth, Grass, NicholsonBailey]
