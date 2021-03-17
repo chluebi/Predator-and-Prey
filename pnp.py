@@ -171,4 +171,4 @@ class Grass(Model):
             'wolf': lambda population, constants: population['wolf'] * (constants['rabbit-value'] * population['rabbit'] - constants['wolf-hunger'])
         }
 
-models = [SimpleModel, LimitedGrowth, LimitedFood]
+models = [SimpleModel, LimitedGrowth, Grass]
