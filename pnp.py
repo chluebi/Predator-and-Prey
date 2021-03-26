@@ -14,11 +14,17 @@ def prune(df, factor):
 
 class Model:
 
+    methods = [
+        'Euler',
+        'Ralston'
+    ]
+
     def __init__(self):
         self.population = self.set_population()
         self.constants = self.set_constants()
         self.functions = self.set_functions()
         self.discrete = self.set_discrete()
+        self.method = self.set_method()
 
     def set_population(self):
         return {
@@ -35,23 +41,39 @@ class Model:
     def set_discrete(self):
         return False
 
+    def set_method(self):
+        return Model.methods[0]
+
 
     def next_step(self, population, constants, functions, t):
-        new_population = population.copy()
+        d_population = {}
+        new_population = {}
 
-        for animal, number in population.items():
-            new_population[animal] = functions[animal](population, constants)
+        if self.discrete:
+            for animal, number in population.items():
+                d_population[animal] = functions[animal](population, constants)
+                new_population[animal] = d_population[animal]
+        elif self.method == 'Euler':
+            for animal, number in population.items():
+                d_population[animal] = functions[animal](population, constants)
+                population[animal] += d_population[animal] * t
+        elif self.method == 'Ralston':
+            d_population1 = {}
+            for animal, number in population.items():
+                d_population1[animal] = functions[animal](population, constants)
 
-        delta_population = {}
+            population2 = {}
+            population2 = {key: value + 2/3 * t * d_population1[key] for key, value in population.items()}
 
-        for animal, number in population.items():
-            if self.discrete:
-                population[animal] = new_population[animal]
-            else:
-                delta_population[animal] = new_population[animal] * t
-                population[animal] += delta_population[animal]
-            population[animal] = population[animal]
+            d_population2 = {}
+            for animal, number in population.items():
+                d_population2[animal] = functions[animal](population2, constants)
 
+            for animal, number in population.items():
+                population[animal] += t * (1/4 * d_population1[animal] + 3/4 * d_population2[animal])
+        else:
+            raise Exception(f'Not a valid method provided (method "{method}" is not defined)')
+                        
         return population
 
     def run_simulation(self, steps, step_size, compression=1):
