@@ -43,12 +43,12 @@ class Model:
     ]
 
     def __init__(self):
+        self.simulation_parameters = self.set_simulation_parameters()
         self.population = self.set_population()
         self.constants = self.set_constants()
         self.functions = self.set_functions()
         self.discrete = self.set_discrete()
         self.method = self.set_method()
-        self.simulation_parameters = self.set_simulation_parameters()
 
     def set_simulation_parameters(self):
         return {
@@ -168,6 +168,42 @@ class Model:
         #print(single_population_development)
         #print(combined_population_development)
         return pd.DataFrame(single_population_development), pd.DataFrame(combined_population_development)
+
+
+    def print_parameters(self):
+        steps = self.simulation_parameters['steps']
+        step_size = self.simulation_parameters['step_size']
+        compression = self.simulation_parameters['compression']
+
+        t = '''
+\\begin{{table}}[]
+\\begin{{tabular}}{{|l|l}}
+\\cline{{1-1}}
+Simulation &  \\\\ \\hline
+steps & \\multicolumn{{1}}{{l|}}{{ {0} }} \\\\ \\hline
+step Size & \\multicolumn{{1}}{{l|}}{{ {1} }} \\\\ \\hline
+compression & \\multicolumn{{1}}{{l|}}{{ {2} }} \\\\ \\hline
+Population &  \\\\ \\hline \n'''.format(steps, step_size, compression)
+
+        for animal, number in self.population.items():
+            t += '{0} & \\multicolumn{{1}}{{l|}}{{ {1} }} \\\\ \\hline \n'.format(animal, number)
+
+        t += 'Constants &  \\\\ \\hline \n'
+
+        for constant, value in self.constants.items():
+            t += '{0} & \\multicolumn{{1}}{{l|}}{{ {1} }} \\\\ \\hline \n'.format(constant, value)
+
+        t += 'Functions &  \\\\ \\hline \n'
+
+        for animal, function in self.functions.items():
+            t += '{0} & \\multicolumn{{1}}{{l|}}{{ $x + x^2$ }} \\\\ \\hline \n'.format(animal, function)
+
+        t += '''\\end{{tabular}}
+\\end{{table}}'''.format('tabular', 'table')
+
+        return t
+
+
 
 
 class SimpleModel(Model):
