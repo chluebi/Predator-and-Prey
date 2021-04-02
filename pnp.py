@@ -1,6 +1,7 @@
 import pandas as pd
 import tqdm
 import math
+import copy
 
 def prune(df, factor):
     df = df.copy()
@@ -12,6 +13,28 @@ def prune(df, factor):
     df = df[(df['time']/distance) % factor == 0]
     return df
 
+
+class ModelSeries:
+
+    def __init__(self, model, r):
+        self.model = copy.deepcopy(model)
+        self.iter = iter(r)
+
+    def change_property(self):
+        next(self.iter)
+
+    def __iter__(self):
+        return self
+    
+    def __next__(self):
+        try:
+            self.change_property(self)
+            seperate_df, combined_df = self.model.run_simulation()
+            return seperate_df, combined_df
+        except StopIteration:
+            raise StopIteration
+            
+     
 class Model:
 
     methods = [
@@ -25,6 +48,15 @@ class Model:
         self.functions = self.set_functions()
         self.discrete = self.set_discrete()
         self.method = self.set_method()
+        self.simulation_parameters = self.set_simulation_parameters()
+
+    def set_simulation_parameters(self):
+        return {
+            'steps': 1000,
+            'step_size': 10**-2,
+            'compression': 1,
+            'verbose': True
+        }
 
     def set_population(self):
         return {
@@ -76,11 +108,16 @@ class Model:
                         
         return population
 
-    def run_simulation(self, steps, step_size, compression=1):
+    def run_simulation(self):
 
         population = self.population.copy()
         constants = self.constants.copy()
         functions = self.functions.copy()
+
+        steps = self.simulation_parameters['steps']
+        step_size = self.simulation_parameters['step_size']
+        compression = self.simulation_parameters['compression']
+        verbose = self.simulation_parameters['verbose']
         
         population_development = [
             {
@@ -89,7 +126,12 @@ class Model:
             }
         ]
 
-        for step in tqdm.tqdm(range(1, steps+1)):
+        if verbose:
+            it = tqdm.tqdm(range(1, steps+1))
+        else:
+            it = range(1, steps+1)
+            
+        for step in it:
             population = self.next_step(population, constants, functions, step_size)
             if step % compression == 0:
                 population_development.append({
