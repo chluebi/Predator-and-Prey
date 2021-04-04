@@ -169,8 +169,83 @@ class Model:
         #print(combined_population_development)
         return pd.DataFrame(single_population_development), pd.DataFrame(combined_population_development)
 
-
     def print_parameters(self):
+        
+        steps = self.simulation_parameters['steps']
+        step_size = self.simulation_parameters['step_size']
+        compression = self.simulation_parameters['compression']
+
+        rows = ['\\begin{table}[]', '\\begin{tabular}{llllllll|}', '\\hline']
+        rows.append('\\multicolumn{2}{{|l|}}{Simulation} & \\multicolumn{2}{l|}{Population} & \\multicolumn{2}{l|}{Functions} & \\multicolumn{2}{l|}{Constants} \\\\ \\hline')
+
+        row_amount = max(len(self.population.items()), len(self.constants.items()), len(self.functions.items()))
+
+        for i in range(row_amount):
+            if i == 0:
+                row = '\\multicolumn{{1}}{{|l|}}{{Steps}} & \\multicolumn{{1}}{{|l|}}{{{0}}}'.format(steps)
+            elif i == 1:
+                row = '\\multicolumn{{1}}{{|l|}}{{Step Size}} & \\multicolumn{{1}}{{|l|}}{{{0}}}'.format(step_size)
+            elif i == 2:
+                row = '\\multicolumn{{1}}{{|l|}}{{Compression}} & \\multicolumn{{1}}{{|l|}}{{{0}}}'.format(compression)
+            else:
+                row = '&'
+
+            row += ' & '
+
+            if i < len(self.population.items()):
+                animal, number = list(self.population.items())[i]
+                row += '\\multicolumn{{1}}{{|l|}}{{{0}}} & \\multicolumn{{1}}{{|l|}}{{{1}}}'.format(animal, number)
+            else:
+                row += '&'
+
+            row += ' & '
+
+            if i < len(self.functions.items()):
+                animal, function = list(self.functions.items())[i]
+                row += '\\multicolumn{{1}}{{|l|}}{{{0}}} & \\multicolumn{{1}}{{|l|}}{{$x$}}'.format(animal)
+            else:
+                row += '&'
+
+            row += ' & '
+
+            if i < len(self.constants.items()):
+                constant, value = list(self.constants.items())[i]
+                row += '\\multicolumn{{1}}{{|l|}}{{{0}}} & \\multicolumn{{1}}{{|l|}}{{{1}}}'.format(constant, value)
+            else:
+                row += '&'
+
+            row += ' \\\\ '
+
+            
+
+            if i+1 == 3:
+                row += '\\cline{1-2}'
+            if i+1 == len(self.population.items()):
+                row += '\\cline{3-4}'
+            if i+1 == len(self.functions.items()):
+                row += '\\cline{5-6}'
+            if i+1 == len(self.constants.items()):
+                row += '\\cline{7-8}'
+
+            rows.append(row)
+
+        rows.append('\\end{tabular}')
+        rows.append('\\end{table}')
+
+        return '\n'.join(rows)
+                
+        t = '''\\begin{table}[]
+\\begin{tabular}{ll|l|l|l|l|ll}
+\\hline
+\\multicolumn{2}{|l|}{Simulation} & \\multicolumn{2}{l|}{Population} & \\multicolumn{2}{l|}{Functions} & \\multicolumn{2}{l|}{Constants} \\\\ \\hline
+\\multicolumn{1}{|l|}{Steps} & steps & Animal1 & animal & f1 & $x$ & \\multicolumn{1}{l|}{C1} & \\multicolumn{1}{l|}{c1} \\\\ \\hline
+\\multicolumn{1}{|l|}{Step Size} & step\\_size & Animal2 & animal & f2 & $x$ & \\multicolumn{1}{l|}{C2} & \\multicolumn{1}{l|}{c2} \\\\ \\hline
+\\multicolumn{1}{|l|}{Compression} & compression & Animal3 & animal & f3 & $x$ & \\multicolumn{1}{l|}{C3} & \\multicolumn{1}{l|}{c3} \\\\ \\hline
+ &  & Animal4 & animal & f4 & $x$ &  &  \\\\ \\cline{3-6}
+\\end{tabular}
+\\end{table}'''
+
+    def print_vertical_parameters(self):
         steps = self.simulation_parameters['steps']
         step_size = self.simulation_parameters['step_size']
         compression = self.simulation_parameters['compression']
