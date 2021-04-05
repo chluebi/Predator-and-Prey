@@ -281,7 +281,7 @@ Population &  \\\\ \\hline \n'''.format(steps, step_size, compression)
 
 
 
-class SimpleModel(Model):
+class LotkaVolterra(Model):
 
     def set_population(self):
         return {
@@ -304,7 +304,7 @@ class SimpleModel(Model):
         }
 
 
-class LimitedGrowth(Model):
+class LogisticPrey(Model):
     def set_population(self):
         return {
         'rabbit':1,
@@ -327,7 +327,7 @@ class LimitedGrowth(Model):
             'wolf': lambda population, constants: population['wolf'] * min(constants['max-wolf-growth'], (constants['rabbit-value'] * population['rabbit'] - constants['wolf-hunger']))
         }
 
-class Grass(Model):
+class ThreePopulations(Model):
     
     def set_population(self):
         return {
@@ -381,4 +381,4 @@ class NicholsonBailey(Model):
         return True
 
 
-models = [SimpleModel, LimitedGrowth, Grass, NicholsonBailey]
+models = [LotkaVolterra, LogisticPrey, ThreePopulations, NicholsonBailey]
